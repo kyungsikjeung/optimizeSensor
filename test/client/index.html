@@ -1,0 +1,554 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.12.0/underscore-min.js"></script>
+    <title>Line Chart</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+
+    <title>optimize</title>
+  </head>
+  <body>
+    <div id="rootVM" v-cloak>
+        <h1>{{debugText}}</h1>
+        <div class="input-group">
+          <div class="input-group-prepend">
+            <span class="input-group-text" id="inputGroupFileAddon01">시뮬레이션 파일 업로드</span>
+          </div>
+          <div class="custom-file">
+            <input ref="myText" @change="readText" type="file" class="custom-file-input" id="inputGroupFile01" aria-describedby="inputGroupFileAddon01">
+            <label class="custom-file-label" for="inputGroupFile01">{{fileName}}</label>
+          </div>
+        </div>
+      <br/>
+      <div class="card" style="width: 100%;">
+        <div class="card-header ">
+          Voc Line Chart 변수 최적화
+        </div>
+        <ul class="list-group list-group-flush">
+        <!--  -->
+        <div class="input-group">
+            <div class="input-group-prepend col-3">
+                <span class="input-group-text col-12">샘플링평균횟수:</span>
+            </div>
+            <input type="number" class="form-control" placeholder="샘플링평균횟수" v-model="numberOfSamplingForAvg">
+        </div>
+        <div class="input-group">
+            <div class="input-group-prepend col-3">
+                <span class="input-group-text col-12">펄스폭:</span>
+            </div>
+            <input type="number" class="form-control" placeholder="펄스폭" v-model="pulse">
+        </div>
+        <div class="input-group">
+            <div class="input-group-prepend col-3">
+                <span class="input-group-text col-12">펄스지연시간:</span>
+            </div>
+            <input type="number" class="form-control" placeholder="펄스지연시간" v-model="timePulse">
+        </div>
+        <div class="input-group">
+            <div class="input-group-prepend col-3">
+                <span class="input-group-text col-12">공기좋음기울기:</span>
+            </div>
+            <input type="float" class="form-control" placeholder="공기좋음기울기" v-model="blueSlope" >
+        </div>
+        <div class="input-group">
+            <div class="input-group-prepend col-3">
+                <span class="input-group-text col-12">공기보통기울기:</span>
+            </div>
+            <input type="float" class="form-control" placeholder="공기보통기울기" v-model="orangeSlope">
+        </div>
+        <div class="input-group">
+            <div class="input-group-prepend col-3">
+                <span class="input-group-text col-12">기준값다운값:</span>
+            </div>
+            <input type="number" class="form-control" placeholder="기준값다운값" v-model="referenceDown">
+        </div>
+        <div class="input-group">
+            <div class="input-group-prepend col-3">
+                <span class="input-group-text col-12">그래프 최대값:</span>
+            </div>
+            <input type="range" min="0" max="14000" class="form-control" placeholder="그래프 최대값" v-model="graphMax">
+            <p>{{ graphMax }}</p>
+        </div>
+        <div class="input-group">
+            <div class="input-group-prepend col-3">
+                <span class="input-group-text col-12">그래프 최대값:</span>
+            </div>
+            <input type="range" min="0" max="5000" class="form-control" placeholder="그래프 최대값" v-model="graphMin">
+            <p>{{ graphMin}}</p>
+        </div>
+        <div class="input-group">
+            <div class="input-group-prepend col-3">
+                <span class="input-group-text col-12">테스트 센서번호:</span>
+                <div class="form-check form-check-inline">
+                    <input v-model="testSensorNum"  class="form-check-input" style="margin-left: 20px;" type="radio" name="inlineRadioOptions" id="inlineRadio1" value=1>
+                    <label class="form-check-label" for="inlineRadio1">1</label>
+                  </div>
+                  <div class="form-check form-check-inline">
+                    <input v-model="testSensorNum" class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio2" value=2>
+                    <label class="form-check-label" for="inlineRadio2">2</label>
+                  </div>
+                  <div class="form-check form-check-inline">
+                    <input v-model="testSensorNum" class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio3" value=3>
+                    <label class="form-check-label" for="inlineRadio3">3</label>
+                  </div>
+                  <div class="form-check form-check-inline">
+                    <input v-model="testSensorNum" class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio4" value=4>
+                    <label class="form-check-label" for="inlineRadio4">4</label>
+                  </div>
+                  <div class="form-check form-check-inline">
+                    <input v-model="testSensorNum" class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio5" value=5>
+                    <label class="form-check-label" for="inlineRadio5">5</label>
+                  </div>
+                  <div class="form-check form-check-inline">
+                    <input v-model="testSensorNum" class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio6" value=6>
+                    <label class="form-check-label" for="inlineRadio6">6</label>
+                  </div>
+                  <div class="form-check form-check-inline">
+                    <input v-model="testSensorNum" class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio7" value=7>
+                    <label class="form-check-label" for="inlineRadio7">7</label>
+                  </div>
+                  <div class="form-check form-check-inline">
+                    <input v-model="testSensorNum" class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio8" value=8>
+                    <label class="form-check-label" for="inlineRadio8">8</label>
+                  </div>
+            </div>
+            
+        </div>
+        
+        <!-- <div class="input-group">
+            <div class="input-group-prepend col-3">
+                <span class="input-group-text col-12">그래프Max:</span>
+            </div>
+            <input type="number" class="form-control" placeholder="그래프Max" v-model="graphMax">
+        </div>
+        <div class="input-group">
+            <div class="input-group-prepend col-3">
+                <span class="input-group-text col-12">그래프Min:</span>
+            </div>
+            <input type="number" class="form-control" placeholder="그래프Min" v-model="graphMin">
+        </div> -->
+  
+        <button type="button" class="btn btn-primary" @click="startSimulation">시뮬레이션 시작</button>
+        <!-- 옵션 변경 끝  -->
+        </ul>
+      </div>
+      <br>
+      <!-- <ul>
+        <li v-for="item in this.testArr" :key="item">{{item}}</li>
+      </ul> -->
+      
+      <br>
+  
+    </div>
+
+    <canvas id="myChart"></canvas>
+
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
+  </body>
+</html>
+<script>
+
+
+
+var timeLine = [];
+
+
+// User Variable Setting
+var variableConfig = {
+    date : '2021-03-16', //시작일
+    startHour : 10, // 시작시간
+    endHour : 12,  // 완료시간
+    numberOfSamplingForAvg : 6, //5*x 초 , where x = numberOfSamplingForAvg
+    pulse : 20, // 허용범위 +- 진폭
+    timePulse : 3, // 허용 범위 폭 1*30초
+    blueSlope : 0.9, // Blue 
+    orangeSlope : 0.85, // Orange
+    referenceDown : 5,
+    test : true ,// 테스트 모드 , true : 센서 testSensorNum 만 테스트
+    testSensorNum : 1,
+    sensorNum : 1
+};
+
+var labels = [];
+var rsData = [];
+var avgData = [];
+var referenceData = [];
+var bufferData = [];
+var bufferMaxData = [];
+var bufferMinData = [];
+var LedData = [];
+var dataSets = [];
+
+// global variable 
+var threshholdTime = [0,0,0,0,0,0,0,0]; // buffer
+var buffer = [0,0,0,0,0,0,0,0]; 
+var reference = [0,0,0,0,0,0,0,0];
+var avgSensors = [0,0,0,0,0,0,0,0]; // Rs
+var avgFlag = [false,false,false,false,false,false,false,false];
+var cntSamplingNumByDevice = [0,0,0,0,0,0,0,0];
+var Led = ['N','N','N','N','N','N','N','N']
+// chart 만들기...
+
+function initializeArr(){
+    threshholdTime = [0,0,0,0,0,0,0,0]; // buffer
+    buffer = [0,0,0,0,0,0,0,0]; 
+    reference = [0,0,0,0,0,0,0,0];
+    avgSensors = [0,0,0,0,0,0,0,0]; // Rs
+    avgFlag = [false,false,false,false,false,false,false,false];
+    cntSamplingNumByDevice = [0,0,0,0,0,0,0,0];
+    Led = ['N','N','N','N','N','N','N','N'];
+    labels = [];
+    rsData = [];
+    avgData = [];
+    referenceData = [];
+    bufferData = [];
+    bufferMaxData = [];
+    bufferMinData = [];
+    LedData = [];
+    dataSets = [];
+}
+
+
+
+
+// 센서로직
+function doSensor(sensorId,time,volt,rs,avg){
+    if(avg > reference[sensorId-1]){
+        reference[sensorId-1] = avg;
+        threshholdTime[sensorId-1] = 0
+    }
+
+    var max = buffer[sensorId-1]+ Number(variableConfig.pulse);
+    var min = buffer[sensorId-1] - Number(variableConfig.pulse);
+    
+    if(avg > max || avg < min){
+        buffer[sensorId-1] = avg;
+        threshholdTime[sensorId-1] = 0;
+    }else{ // 버퍼안
+        threshholdTime[sensorId-1] = threshholdTime[sensorId-1]+1;  
+    }
+    if(threshholdTime[sensorId-1] >= variableConfig.timePulse + 1){   
+        threshholdTime[sensorId-1] = 0;
+        reference[sensorId-1]  = reference[sensorId-1] - variableConfig.referenceDown;
+    }
+    // AQI
+    var AdcResult = parseFloat(avg)/parseFloat(reference[sensorId-1])
+    if(AdcResult > variableConfig.blueSlope){
+        Led[sensorId-1] = 'Blue'
+    }else if(AdcResult> variableConfig.orangeSlope){
+        Led[sensorId-1] = 'Orange'
+    }else{
+        Led[sensorId-1] = 'Red'
+    }
+};
+
+// 센서 Id return 
+function verifyAndReturnDeviceId(line){
+  var isValidTime = false;
+  var deviceID = -1;
+  
+  var indexVolt = line.indexOf('Volt');
+  if(indexVolt == -1){
+    isValidTime = false;
+  }
+  deviceID = Number(line[indexVolt+4]);
+  if(deviceID > 0 ){
+    isValidTime = true;
+  }
+  return  Number(deviceID) ; // Validation 성공하면 장치 ID 반환 , 실패하면 -1 반환    
+} 
+
+const rootVM = new Vue({
+	name: "RootVM",
+	el: "#rootVM",
+	created() {		
+	},
+	data: {
+	   fileName : '파일을 선택해주세요', // 파일 명
+       test : true, // 테스트 모드일떄 testSensorNum에 대해서만
+       testSensorNum : 1,
+       date : '2021-03-11', // TODO : 추후 적용 예정
+       startHour : 10, // TODO
+       endHour : 12,   // TODO
+       numberOfSamplingForAvg : 6, //5*x 초 , 평균 산술 시간
+       pulse : 40, // 허용범위 +- 진폭
+       timePulse : 2, // 허용 범위 delay시간
+       blueSlope : 0.99, // Blue 
+       orangeSlope : 0.98, // Orange
+       referenceDown : 20, // 레퍼런스 낮추는값
+       avgFlag : [false,false,false,false,false,false,false,false], //센서별 일정시간 지나면 평균 냄
+       cntSamplingNumByDevice : [0,0,0,0,0,0,0,0], // 평균내기 위한 일정시간 카운트
+       Led : ['N','N','N','N','N','N','N','N'], // 센서 ID 의 LED값
+       //bufferFlag : false, //
+       timeArr : [], // 그래프 (시간)
+       rsArr : [], // 그래프 (RS)
+       avgArr : [],// 그래프 (평균)
+       text : 'test', // *.text 파일 스트링 값
+       debugText : '', // 디버그용
+       testArr : [], // 디버그용
+       hasDeviceID : false,
+      // deviceID : 0,
+       graphMin : 2000,
+       graphMax : 4000,
+	},
+	methods: {
+		readText (event){ // 파일 읽어 스트링 저장
+            var fileName = event.target.files[0].name;
+            let file = this.$refs.myText.files[0];
+            if(!file || file.type !== 'text/plain') return;      
+            let reader = new FileReader();
+            reader.readAsText(file, "UTF-8");
+            reader.onload =  evt => {
+                this.text = evt.target.result;
+                this.fileName = fileName; 
+            }
+        },
+        startSimulation(){
+            initializeArr();
+            // read by line
+            var lineByLineArr = this.text.split(/\r?\n/);
+            var testSensorNum = this.testSensorNum;
+            var testMode = this.test;
+            // 바인딩 해제. 성능 저하됨.
+            variableConfig.numberOfSamplingForAvg = this.numberOfSamplingForAvg;
+            variableConfig.pulse = this.pulse;
+            variableConfig.timePulse = this.timePulse;
+            variableConfig.blueSlope = this.blueSlope;
+            variableConfig.orangeSlope = this.orangeSlope;
+            variableConfig.referenceDown = this.referenceDown;
+
+            _.each(lineByLineArr, function(line){
+                var deviceID  = verifyAndReturnDeviceId(line);
+                var hasDeviceID = deviceID > -1  ? true : false;
+                if(testMode && deviceID == testSensorNum){
+                  hasDeviceID = true;
+                }else{
+                  hasDeviceID = false;
+                }
+                if(hasDeviceID){
+                    var time = line.substring(12,23);
+                    var volt=parseFloat (line.substring(32,39));
+                    var rs = Number(line.substring(44,49)); 
+                    var avg = Number(line.substring(57,61));
+                    var log = {deviceID:deviceID,time:time,rs:rs,avg:avg};
+
+                    // 산술
+                    avgFlag[deviceID-1] = false;
+                    if(cntSamplingNumByDevice[deviceID-1] == variableConfig.numberOfSamplingForAvg - 1){ 
+                        cntSamplingNumByDevice[deviceID-1] = 0;
+                        avgFlag[deviceID-1] = true;
+                    }
+                    cntSamplingNumByDevice[deviceID-1] = cntSamplingNumByDevice[deviceID-1] + 1;
+
+                    if(avgFlag[deviceID-1]){
+                        doSensor(deviceID,time,volt,rs,avg);
+                    }else{ 
+                        //console.log('30초마다 한번씩')
+                    }
+                   /* var obj = {
+                        'time':time,
+                        'rs':Number(rs),
+                        'avg': avg,
+                        'reference': Number(reference[deviceID-1]),
+                        'buffer': Number(buffer[deviceID-1]),
+                        'bufferMax': Number(buffer[deviceID-1] + variableConfig.pulse),
+                        'bufferMin': Number(buffer[deviceID-1] - variableConfig.pulse),
+                        'Led' : Led[deviceID-1],
+                        'blueSlope':  variableConfig.blueSlope,
+                        'orangeSlope':variableConfig.orangeSlope
+                    }
+                    console.log(JSON.stringify(obj)) */
+                    labels.push(time + Led[deviceID-1]);
+                    rsData.push(Number(rs));
+                    avgData.push(avg);
+                    referenceData.push(Number(reference[deviceID-1]));
+                    bufferData.push(Number(buffer[deviceID-1]));
+                    bufferMaxData.push(Number(buffer[deviceID-1] + variableConfig.pulse));
+                    bufferMinData.push(Number(buffer[deviceID-1] - variableConfig.pulse));
+                    LedData.push(Led[deviceID-1]);
+                }
+            })// _.each end
+            var max = Number(this.graphMax);
+            var min = Number(this.graphMin);
+
+            datasets = [
+                        {
+                            label: "rs",
+                            data: rsData,
+                            backgroundColor: [
+                                'rgba(105, 0, 132, .2)',
+                            ],
+                            borderColor: [
+                                'rgba(200, 99, 132, .7)',
+                            ],
+                            fill: false,
+                            borderWidth: 1,
+                            stepped: false
+                        },
+                        {
+                            label: "avg",
+                            data: avgData,
+                            backgroundColor: [
+                                'rgba(200, 99, 132, .7)',
+                            ],
+                            borderColor: [
+                                'rgba(200, 99, 132, .7)',
+                            ],
+                            fill: false,
+                            borderWidth: 1,
+                            stepped: false
+                        },
+                        {
+                            label: "reference",
+                            data: referenceData,
+                            backgroundColor: [
+                                'rgba(105, 44, 132, .2)',
+                            ],
+                            borderColor: [
+                                'rgba(138, 14, 88, .7)',
+                            ],
+                            fill: false,
+                            borderWidth: 2,
+                            stepped: false
+                        },
+                        {
+                            label: "buffer",
+                            data: bufferData,
+                            backgroundColor: [
+                                'rgba(55, 0, 132, .2)',
+                            ],
+                            borderColor: [
+                                'rgba(270, 99, 132, .7)',
+                            ],
+                            fill: false,
+                            borderWidth: 2,
+                            stepped: false
+                        },
+                        {
+                            label: "bufferMax",
+                            data: bufferMaxData,
+                            backgroundColor: [
+                                'rgba(255, 13, 44, 1)',
+                            ],
+                            borderColor: [
+                                'rgba(255, 13, 44, 1)',
+                            ],
+                            fill: false,
+                            borderWidth: 1,
+                            stepped: false
+                        },
+                        {
+                            label: "bufferMin",
+                            data: bufferMinData,
+                            backgroundColor: [
+                                'rgba(13, 52, 252, 1)',
+                            ],
+                            borderColor: [
+                                'rgba(13, 52, 252, 1)',
+                            ],
+                            fill: false,
+                            borderWidth: 1,
+                            stepped: false
+                        },
+                    ];
+            chart.data.datasets = datasets;
+            chart.data.labels = labels;
+            chart.options = {
+                responsive: true,
+                    scales: {
+                        yAxes: [{
+                            ticks: {
+                                min: min,
+                                max: max,
+                                fontSize : 14,
+                            }
+                        }]
+                    }
+            };
+            chart.update();
+        },
+	}
+});
+
+var options =  
+    {
+        responsive: true,
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        min: 1000,
+                        max: 2000,
+                        fontSize : 14,
+                    }
+                }]
+            }
+    };
+
+function addData(chart, label, color, data) {
+		chart.data.datasets.push({
+	    label: label,
+        backgroundColor: color,
+        data: data
+    });
+    chart.update();
+}
+
+function removeData(chart) {
+    chart.data.labels.pop();
+    chart.data.datasets.forEach((dataset) => {
+        dataset.data.pop();
+    });
+    chart.update();
+}
+
+
+
+var ctx = document.getElementById('myChart').getContext('2d');
+var chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels:  [28, 48, 40, 19, 86, 27, 90],
+          datasets:  [{
+              label: "My First dataset",
+              data: [5, 48, 40, 19, 86, 27, 90],
+              backgroundColor: [
+                'rgba(105, 0, 132, .2)',
+              ],
+              borderColor: [
+                'rgba(200, 99, 132, .7)',
+              ],
+              fill: false,
+              borderWidth: 2,
+              stepped: false
+            },
+            {
+              label: "My Second dataset",
+              data: [28, 9, 40, 19, 86, 27, 90],
+              backgroundColor: [
+                'rgba(0, 137, 132, .2)',
+              ],
+              borderColor: [
+                'rgba(0, 10, 130, .7)',
+              ],
+              fill: false,
+              borderWidth: 2
+            }
+          ]
+          
+        },
+        options: options
+});
+</script>
